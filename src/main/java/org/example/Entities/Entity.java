@@ -8,4 +8,9 @@ public class Entity {
     public Rectangle bounds;
     public String direction = "";
     public boolean collisionOn = false;
+
+    public void setDefaultValues(){
+        x = 200;
+        y = 400;
+    }
 }

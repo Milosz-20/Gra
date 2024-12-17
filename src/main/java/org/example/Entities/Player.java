@@ -49,6 +49,7 @@ public class Player extends Entity {
         screenY = gp.screenHeight / 2 - (gp.tileSize / 2);
     }
 
+    @Override
     public void setDefaultValues() {
         x = 96;
         y = 96;

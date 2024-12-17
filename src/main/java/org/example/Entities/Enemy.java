@@ -14,6 +14,7 @@ public class Enemy extends Entity {
         setDefaultValues();
     }
 
+    @Override
     public void setDefaultValues(){
         x = 600;
         y = 300;
