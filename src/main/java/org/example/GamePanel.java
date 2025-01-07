@@ -10,16 +10,15 @@ import java.awt.*;
 
 public class GamePanel extends JPanel implements Runnable {
     // Screen settings
-    final int originalTileSize = 16; // 16x16 tile
+    final int originalTileSize = 16;
     final int scale = 3;
-    public final int tileSize = originalTileSize * scale; // 48x48 tile
+    public final int tileSize = originalTileSize * scale;
     final int maxScreenCol = 16;
     final int maxScreenRow = 9;
-    public final int screenWidth = tileSize * maxScreenCol; // 768 pixels
-    public final int screenHeight = tileSize * maxScreenRow; // 432 pixels
+    public final int screenWidth = tileSize * maxScreenCol;
+    public final int screenHeight = tileSize * maxScreenRow;
     final int FPS = 60;
 
-    // Tile manager and collision checker (make sure these are initialized correctly)
     TileManager tileM = new TileManager(this);
     public CollisionChecker cc = new CollisionChecker(this, tileM);
 
@@ -27,11 +26,12 @@ public class GamePanel extends JPanel implements Runnable {
     Thread gameThread;
 
     public Player player = new Player(this, keyH, tileM, cc);
-    //Enemy enemy1 = new Enemy(this); // You'll need to update Enemy class for camera
+    //Enemy enemy1 = new Enemy(this);
 
-    // Camera position
     public int cameraX = 0;
     public int cameraY = 0;
+
+    private boolean gameWon = false;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -66,24 +66,48 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void update() {
         player.update();
-        //enemy1.update(); // Update enemy logic with camera in mind
+        //enemy1.update();
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
-        // Draw tiles (with camera offset)
         tileM.draw(g2);
-
-        // Draw player (with camera offset)
         player.draw(g2);
+        //enemy1.draw(g2);
 
-        // Draw enemy (with camera offset)
-        //enemy1.draw(g2); // Update enemy draw method
+        if (gameWon) {
+            g2.setColor(Color.BLACK);
+            g2.setFont(new Font("Arial", Font.BOLD, 72));
+            String text = "You Won!";
+            int x = getXForCenteredText(text, g2);
+            int y = tileSize * 4;
+            g2.drawString(text, x, y);
+
+            g2.setFont(new Font("Arial", Font.BOLD, 48));
+            String score = "Coins: " + player.getCoinCount();
+            x = getXForCenteredText(score, g2);
+            y += tileSize * 2;
+            g2.drawString(score, x, y);
+
+            gameThread = null; // Stop the game loop
+        }
 
         g2.dispose();
     }
 
-    // You can remove the drawGrid method if you don't need it anymore.
+    public int getXForCenteredText(String text, Graphics2D g2) {
+        int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
+        return screenWidth / 2 - length / 2;
+    }
+
+    // Getter and setter for gameWon
+    public void setGameWon(boolean won) {
+        this.gameWon = won;
+    }
+
+    public boolean isGameWon() {
+        return gameWon;
+    }
 }

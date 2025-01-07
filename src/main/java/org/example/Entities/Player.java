@@ -7,7 +7,7 @@ import org.example.tile.TileManager;
 
 import java.awt.*;
 
-public class Player extends Entity {
+public class Player extends Entity { // Now extends Entity again
     GamePanel gp;
     KeyHandler keyH;
     TileManager tm;
@@ -28,35 +28,46 @@ public class Player extends Entity {
     // Dash variables
     boolean isDashing = false;
     int dashSpeedIndex = 6; // Index for dash speed in speeds array
-    int dashDuration = 15; // Duration of the dash in frames (adjust as needed)
+    int dashDuration = 15;
     int dashDistance = 96;
     int dashFrames = 0;
     int dashCounter = 0;
-    boolean canDash = true;       // Flag to indicate if the player can currently dash
-    int dashCooldown = 0;         // Cooldown timer for dash
-    final int dashCooldownTime = 60; // Cooldown time in frames (adjust as needed)
+    boolean canDash = true;
+    int dashCooldown = 0;
+    final int dashCooldownTime = 60;
+
+    private int coinCount = 0;
+    private int defaultX, defaultY;
+
 
     public Player(GamePanel gp, KeyHandler keyH, TileManager tm, CollisionChecker cc) {
+        this.gp = gp; // Removed super() call
         this.keyH = keyH;
-        this.gp = gp;
         this.tm = tm;
         this.cc = cc;
         bounds = new Rectangle(0, 0, 48, 48);
         setDefaultValues();
 
-        // Set the player's screen position to the center of the screen
         screenX = gp.screenWidth / 2 - (gp.tileSize / 2);
         screenY = gp.screenHeight / 2 - (gp.tileSize / 2);
+
     }
 
     @Override
     public void setDefaultValues() {
-        x = 96;
-        y = 96;
+        defaultX = 96; // Set the default spawn x
+        defaultY = 96; // Set the default spawn y
+        x = defaultX;
+        y = defaultY;
         speed = speeds[4];
+        coinCount = 0;
     }
 
     public void update() {
+        if (gp.isGameWon()) {
+            return; // Stop updating the player if the game is won
+        }
+
         int dx = 0;
 
         // Handle dash cooldown
@@ -70,20 +81,20 @@ public class Player extends Entity {
             canDash = false;
             dashFrames = dashDuration;
             dashCounter = 0;
-            dashCooldown = dashCooldownTime; // Start cooldown
+            dashCooldown = dashCooldownTime;
         }
 
         if (isDashing) {
             performDash();
         } else {
-            // Handle horizontal movement (only if not dashing)
+            // Handle horizontal movement
             if (keyH.leftPressed && !keyH.rightPressed) {
                 dx -= speed;
             } else if (keyH.rightPressed && !keyH.leftPressed) {
                 dx += speed;
             }
 
-            // Check for horizontal collisions before updating x position
+            // Check for horizontal collisions
             if (!cc.hasHorizontalCollision(this, dx)) {
                 x += dx;
             }
@@ -114,7 +125,7 @@ public class Player extends Entity {
                 fallSpeed += gravity;
             }
 
-            // Check for vertical collisions before updating y position
+            // Check for vertical collisions
             if (cc.hasVerticalCollision(this, fallSpeed)) {
                 if (fallSpeed > 0) {
                     // Colliding with ground
@@ -124,15 +135,15 @@ public class Player extends Entity {
                     onGround = true;
                     fallSpeed = 0;
                 } else if (fallSpeed < 0) {
-                    // Colliding with ceiling (head bump)
-                    fallSpeed = 0; // Stop upward movement
+                    // Colliding with ceiling
+                    fallSpeed = 0;
                 }
             } else {
                 y += fallSpeed;
                 onGround = false;
             }
 
-            // Jump logic (only jump if on the ground)
+            // Jump logic
             if (keyH.spacePressed && onGround) {
                 fallSpeed = jumpStrength;
                 onGround = false;
@@ -143,10 +154,14 @@ public class Player extends Entity {
         if (onGround) {
             canDash = true;
         }
+
+        // Check for coin and spike collisions
+        cc.checkCoin(this);
+        cc.checkSpike(this);
+        cc.checkFlag(this);
     }
 
     private void performDash() {
-        // When dashing, ignore gravity
         fallSpeed = 0;
         int dashSpeed = speeds[dashSpeedIndex];
         int dx = 0, dy = 0;
@@ -211,5 +226,26 @@ public class Player extends Entity {
     public void draw(Graphics2D g2) {
         g2.setColor(Color.black);
         g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize);
+
+        // Display coin count
+        g2.setColor(Color.YELLOW);
+        g2.setFont(new Font("Arial", Font.BOLD, 24));
+        g2.drawString("Coins: " + coinCount, 10, 30);
+    }
+
+    public void incrementCoinCount() {
+        coinCount++;
+    }
+
+    public void resetToDefault() {
+        x = defaultX;
+        y = defaultY;
+        fallSpeed = 0;
+        isDashing = false;
+        onGround = false;
+        direction = "down";
+    }
+    public int getCoinCount() {
+        return coinCount;
     }
 }
