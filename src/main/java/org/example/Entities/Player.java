@@ -7,7 +7,7 @@ import org.example.tile.TileManager;
 
 import java.awt.*;
 
-public class Player extends Entity { // Now extends Entity again
+public class Player extends Entity {
     GamePanel gp;
     KeyHandler keyH;
     TileManager tm;
@@ -19,13 +19,11 @@ public class Player extends Entity { // Now extends Entity again
     boolean onGround = false;
     String direction = "down";
 
-    // Camera variables
     public int screenX;
     public int screenY;
 
     int[] speeds = {1, 2, 3, 4, 6, 8, 12, 16, 24, 48};
 
-    // Dash variables
     boolean isDashing = false;
     int dashSpeedIndex = 6; // Index for dash speed in speeds array
     int dashDuration = 15;
@@ -41,7 +39,7 @@ public class Player extends Entity { // Now extends Entity again
 
 
     public Player(GamePanel gp, KeyHandler keyH, TileManager tm, CollisionChecker cc) {
-        this.gp = gp; // Removed super() call
+        this.gp = gp;
         this.keyH = keyH;
         this.tm = tm;
         this.cc = cc;
@@ -55,8 +53,8 @@ public class Player extends Entity { // Now extends Entity again
 
     @Override
     public void setDefaultValues() {
-        defaultX = 96; // Set the default spawn x
-        defaultY = 96; // Set the default spawn y
+        defaultX = 300; // Set the default spawn x
+        defaultY = 596; // Set the default spawn y
         x = defaultX;
         y = defaultY;
         speed = speeds[4];
@@ -65,7 +63,7 @@ public class Player extends Entity { // Now extends Entity again
 
     public void update() {
         if (gp.isGameWon()) {
-            return; // Stop updating the player if the game is won
+            return;
         }
 
         int dx = 0;
@@ -87,20 +85,16 @@ public class Player extends Entity { // Now extends Entity again
         if (isDashing) {
             performDash();
         } else {
-            // Handle horizontal movement
             if (keyH.leftPressed && !keyH.rightPressed) {
                 dx -= speed;
             } else if (keyH.rightPressed && !keyH.leftPressed) {
                 dx += speed;
             }
-
-            // Check for horizontal collisions
             if (!cc.hasHorizontalCollision(this, dx)) {
                 x += dx;
             }
         }
 
-        // Update direction based on key presses
         if (keyH.upPressed && keyH.leftPressed) {
             direction = "topleft";
         } else if (keyH.upPressed && keyH.rightPressed) {
@@ -119,23 +113,19 @@ public class Player extends Entity { // Now extends Entity again
             direction = "right";
         }
 
-        // Handle gravity and jumping (vertical movement)
         if (!isDashing) {
             if (!onGround) {
                 fallSpeed += gravity;
             }
 
-            // Check for vertical collisions
             if (cc.hasVerticalCollision(this, fallSpeed)) {
                 if (fallSpeed > 0) {
-                    // Colliding with ground
                     while (!cc.hasVerticalCollision(this, 1)) {
                         y++;
                     }
                     onGround = true;
                     fallSpeed = 0;
                 } else if (fallSpeed < 0) {
-                    // Colliding with ceiling
                     fallSpeed = 0;
                 }
             } else {
@@ -143,19 +133,16 @@ public class Player extends Entity { // Now extends Entity again
                 onGround = false;
             }
 
-            // Jump logic
             if (keyH.spacePressed && onGround) {
                 fallSpeed = jumpStrength;
                 onGround = false;
             }
         }
 
-        // Allow dash again when on the ground
         if (onGround) {
             canDash = true;
         }
 
-        // Check for coin and spike collisions
         cc.checkCoin(this);
         cc.checkSpike(this);
         cc.checkFlag(this);
@@ -166,7 +153,6 @@ public class Player extends Entity { // Now extends Entity again
         int dashSpeed = speeds[dashSpeedIndex];
         int dx = 0, dy = 0;
 
-        // Calculate movement based on direction
         switch (direction) {
             case "topleft":
                 dx = (int) Math.round(-dashSpeed / Math.sqrt(2));
@@ -198,7 +184,6 @@ public class Player extends Entity { // Now extends Entity again
                 break;
         }
 
-        // Check for collisions and limit dash distance
         int distanceToMove = Math.min(dashSpeed, dashDistance - dashCounter);
         if (!cc.hasHorizontalCollision(this, dx)) {
             if (Math.abs(dx) <= distanceToMove) {
@@ -227,7 +212,6 @@ public class Player extends Entity { // Now extends Entity again
         g2.setColor(Color.black);
         g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize);
 
-        // Display coin count
         g2.setColor(Color.YELLOW);
         g2.setFont(new Font("Arial", Font.BOLD, 24));
         g2.drawString("Coins: " + coinCount, 10, 30);

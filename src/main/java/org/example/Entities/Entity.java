@@ -2,7 +2,7 @@ package org.example.Entities;
 
 import java.awt.*;
 
-public class Entity {
+public abstract class Entity implements IEntity {
     public int x, y;
     public int speed;
     public Rectangle bounds;

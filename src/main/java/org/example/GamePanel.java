@@ -26,7 +26,6 @@ public class GamePanel extends JPanel implements Runnable {
     Thread gameThread;
 
     public Player player = new Player(this, keyH, tileM, cc);
-    //Enemy enemy1 = new Enemy(this);
 
     public int cameraX = 0;
     public int cameraY = 0;
@@ -66,7 +65,6 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void update() {
         player.update();
-        //enemy1.update();
     }
 
     public void paintComponent(Graphics g) {
@@ -75,7 +73,6 @@ public class GamePanel extends JPanel implements Runnable {
 
         tileM.draw(g2);
         player.draw(g2);
-        //enemy1.draw(g2);
 
         if (gameWon) {
             g2.setColor(Color.BLACK);
@@ -91,7 +88,7 @@ public class GamePanel extends JPanel implements Runnable {
             y += tileSize * 2;
             g2.drawString(score, x, y);
 
-            gameThread = null; // Stop the game loop
+            gameThread = null;
         }
 
         g2.dispose();
@@ -102,7 +99,6 @@ public class GamePanel extends JPanel implements Runnable {
         return screenWidth / 2 - length / 2;
     }
 
-    // Getter and setter for gameWon
     public void setGameWon(boolean won) {
         this.gameWon = won;
     }
